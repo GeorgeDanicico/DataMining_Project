@@ -1,15 +1,16 @@
 import re
 import os
-
-import nltk
 from nltk.corpus import stopwords
-from whoosh.analysis import StemmingAnalyzer
+from whoosh.fields import Schema, TEXT
+from whoosh.lang.porter import stem
+from whoosh import index, scoring
+from whoosh.qparser import QueryParser
 
-nltk.download('stopwords')
+# nltk.download('stopwords')  # it must be downloaded only once
 stop_words = set(stopwords.words('english'))
 
 def process_file(filename, content):
-    with open(filename, 'r') as file:
+    with open(filename, 'r', errors='ignore') as file:
         current_title = None
 
         for line in file:
@@ -26,12 +27,65 @@ def process_file(filename, content):
                 content[current_title].update(numbers)
     return content
 
+def stem_words(content):
+    stemmed_content = {}
 
-# TODO - change directory path to your own
-dirname = '/Users/george/Downloads/wiki'
-dictionary = {}
-for filename in os.listdir(dirname):
-    filename = os.path.join(dirname, filename)
-    content = process_file(filename, dictionary)
-    print(content)
-    break
+    for current_title in content:
+        stemmed_content[current_title] = set()
+
+        for word in content[current_title]:
+            stemmed_word = stem(word)
+            stemmed_content[current_title].add(stemmed_word)
+
+    return stemmed_content
+
+def index_documents(stemmed_content, ix):
+    writer = ix.writer()
+
+    for current_title in stemmed_content:
+        current_content = ' '.join(stemmed_content[current_title])
+        writer.add_document(title=current_title, content=current_content)
+
+    writer.commit()
+
+    return ix
+
+
+def retrieve(index_name, query):
+    with index_name.searcher(weighting=scoring.TF_IDF()) as searcher:
+
+        results = searcher.search(query, limit=None)
+        if results:
+            return results[0]['title']
+        else:
+            return None
+
+
+def start():
+
+    schema = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
+
+    if not os.path.exists("indexdir"):
+        os.mkdir("indexdir")
+
+    ix = index.create_in("indexdir", schema)
+
+    # TODO - change directory path to your own
+    dirname = '../FileExample/'
+    dictionary = {}
+
+    for filename in os.listdir(dirname):
+        filename = os.path.join(dirname, filename)
+        content = process_file(filename, dictionary)
+        stemmed_content = stem_words(content)
+        ix = index_documents(stemmed_content, ix)
+
+
+    qp = QueryParser("content", schema=ix.schema)
+    q = qp.parse(u"r redirect tpl")
+    result = retrieve(ix, q)
+
+    print(f"The most similar Wikipedia page is: {result}")
+
+
+start()
