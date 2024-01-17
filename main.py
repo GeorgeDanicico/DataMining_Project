@@ -56,21 +56,25 @@ def start():
 
     if not os.path.exists("my_index_directory"):
         os.mkdir("my_index_directory")
-
-    ix = index.create_in("my_index_directory", schema)
+        ix = index.create_in("my_index_directory", schema)
+        ok = False
+    else:
+        ix = index.open_dir("my_index_directory")
+        ok = True
 
     # TODO - change directory path to your own
     dirname = '../FileExample/'
     dictionary = {}
 
-    for filename in os.listdir(dirname):
-        filename = os.path.join(dirname, filename)
-        content = process_file(filename, dictionary)
-        ix = index_documents(content, ix)
+    if not ok:
+        for filename in os.listdir(dirname):
+            filename = os.path.join(dirname, filename)
+            content = process_file(filename, dictionary)
+            ix = index_documents(content, ix)
 
 
     qp = QueryParser("content", schema=ix.schema)
-    q = qp.parse(u"r redirect tpl")
+    q = qp.parse(u"tpl")
     result = retrieve(ix, q)
 
     print(f"The most similar Wikipedia page is: {result}")
