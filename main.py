@@ -14,6 +14,7 @@ def process_file(filename, content):
         current_title = None
 
         for line in file:
+            print(line)
             if line.startswith("[[") and line.endswith("]]\n"):
                 current_title = line[2:-3]
                 content[current_title] = set()
@@ -22,22 +23,10 @@ def process_file(filename, content):
                 for word in words:
                     if word not in stop_words:
                         if not any(char.isdigit() for char in word):
-                            content[current_title].add(word.lower())
+                            content[current_title].add(stem(word.lower()))
                 numbers = set(re.findall(r'\b\d+\b', line))
                 content[current_title].update(numbers)
     return content
-
-def stem_words(content):
-    stemmed_content = {}
-
-    for current_title in content:
-        stemmed_content[current_title] = set()
-
-        for word in content[current_title]:
-            stemmed_word = stem(word)
-            stemmed_content[current_title].add(stemmed_word)
-
-    return stemmed_content
 
 def index_documents(stemmed_content, ix):
     writer = ix.writer()
@@ -65,10 +54,10 @@ def start():
 
     schema = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
 
-    if not os.path.exists("indexdir"):
-        os.mkdir("indexdir")
+    if not os.path.exists("my_index_directory"):
+        os.mkdir("my_index_directory")
 
-    ix = index.create_in("indexdir", schema)
+    ix = index.create_in("my_index_directory", schema)
 
     # TODO - change directory path to your own
     dirname = '../FileExample/'
@@ -77,8 +66,7 @@ def start():
     for filename in os.listdir(dirname):
         filename = os.path.join(dirname, filename)
         content = process_file(filename, dictionary)
-        stemmed_content = stem_words(content)
-        ix = index_documents(stemmed_content, ix)
+        ix = index_documents(content, ix)
 
 
     qp = QueryParser("content", schema=ix.schema)
