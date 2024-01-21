@@ -1,26 +1,19 @@
-from nltk.stem import WordNetLemmatizer
-from whoosh.analysis import CompositeAnalyzer
+from whoosh.analysis import Filter, RegexTokenizer
+import spacy
 
 
-class Lemmatizer:
+class LemmatizationFilter(Filter):
     def __init__(self):
-        self.__lemmatizer = WordNetLemmatizer()
+        self.__nlp = spacy.load("en_core_web_sm")
 
-    def lemmatize(self, token):
-        return self.__lemmatizer.lemmatize(token)
+    def __call__(self, tokens):
+        for token in tokens:
+            doc = self.__nlp(token.text)
+            token.text = doc[0].lemma_
+            yield token
 
-    def process(self, tokens):
-        return [self.lemmatize(token) for token in tokens]
 
-    def __or__(self, other):
-        return CompositeAnalyzer(self, other)
-
-    @staticmethod
-    def composable(fn):
-        def wrapper(*args, **kwargs):
-            result = fn(*args, **kwargs)
-            if isinstance(result, list):
-                return Lemmatizer().process(result)
-            return result
-
-        return wrapper
+if __name__ == "__main__":
+    tokenizer = RegexTokenizer(r"[\w-]+(\.?\w+)*")
+    for token in tokenizer(u"|title=Kitemark.com      |publisher=Kitemark.com |date= |accessdate=2012-04-03[/tpl]"):
+        print(token.text)
