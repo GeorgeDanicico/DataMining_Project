@@ -1,7 +1,7 @@
 import os
 
 from nltk.corpus import stopwords
-from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter, StemmingAnalyzer
+from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from lemmatizer import LemmatizationFilter
 from utils.Constants import Constants
 from whoosh.fields import Schema, TEXT
@@ -50,7 +50,7 @@ def process_line(line):
 
 
 def index_documents(content, ix):
-    writer = ix.writer(procs=4)
+    writer = ix.writer(procs=4, multisegment=True)
 
     for current_title in content:
         writer.add_document(title=current_title, content=content[current_title])
@@ -78,7 +78,7 @@ def add_documents_to_index(ix):
 
 
 def create_index():
-    my_analyzer = StemmingAnalyzer(expression=r"[\w-]+(\.?\w+)*", stoplist=stop_words) | LowercaseFilter()
+    my_analyzer = RegexTokenizer(expression=r"[\w-]+(\.?\w+)*") | LowercaseFilter() | LemmatizationFilter() | StopFilter(stop_words)
     schema = Schema(title=TEXT(stored=True, analyzer=my_analyzer, field_boost=2.0), content=TEXT(analyzer=my_analyzer))
 
     if not os.path.exists(Constants.INDEX_DIRECTORY):
