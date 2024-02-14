@@ -2,7 +2,7 @@ import os
 
 from nltk.corpus import stopwords
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
-from lemmatizer import LemmatizationFilter
+from lemmatizer import CustomFilter
 from utils.Constants import Constants
 from whoosh.fields import Schema, TEXT
 from whoosh import index, scoring
@@ -50,7 +50,7 @@ def process_line(line):
 
 
 def index_documents(content, ix):
-    writer = ix.writer(procs=4, multisegment=True)
+    writer = ix.writer()
 
     for current_title in content:
         writer.add_document(title=current_title, content=content[current_title])
@@ -78,7 +78,7 @@ def add_documents_to_index(ix):
 
 
 def create_index():
-    my_analyzer = RegexTokenizer(expression=r"[\w-]+(\.?\w+)*") | LowercaseFilter() | LemmatizationFilter() | StopFilter(stop_words)
+    my_analyzer = RegexTokenizer(expression=r"[\w-]+(\.?\w+)*") | CustomFilter()
     schema = Schema(title=TEXT(stored=True, analyzer=my_analyzer, field_boost=2.0), content=TEXT(analyzer=my_analyzer))
 
     if not os.path.exists(Constants.INDEX_DIRECTORY):
@@ -100,7 +100,7 @@ def start():
 
     qp = QueryParser("content", schema=ix.schema)
     q = qp.parse(
-        u"Daniel Hertzberg & James B. Stewart of this paper shared a 1988 Pulitzer for their stories about insider trading")
+        u"The dominant paper in our nation's capital, it's among the top 10 U.S. papers in circulation")
     result = retrieve(ix, q)
 
     print(f"The most similar Wikipedia page is: {result}")
