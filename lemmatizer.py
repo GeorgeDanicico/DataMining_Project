@@ -2,7 +2,7 @@ from whoosh.analysis import Filter
 import spacy
 
 
-class CustomFilter(Filter):
+class LemmatizationFilter(Filter):
     def __init__(self):
         self.__nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
 
