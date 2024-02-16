@@ -11,6 +11,7 @@
   pip install nltk
 ```
 - Se descarca fisierele wikipedia de pe urmatorul link: [wikipedia](https://www.dropbox.com/s/nzlb96ejt3lhd7g/wiki-subset-20140602.tar.gz?dl=0)
+- Se copiaza fisierele descarcate in folderul ```FileExample```
 - Se ruleaza urmatoarea comanda pentru a descarca stopwords-urile:
 ```python
   nltk.download('stopwords')

@@ -1,6 +1,6 @@
 class Constants:
     INDEX_DIRECTORY = "my_index_directory"
-    WIKI_DIRECTORY = "../FileExample/"
+    WIKI_DIRECTORY = "./FileExample/"
     REDIRECT_PREFIX = "#REDIRECT "
     HTTP_PREFIX = "http://www."
     HTTPS_PREFIX = "https://www."
