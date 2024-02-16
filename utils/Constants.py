@@ -4,7 +4,8 @@ class Constants:
     REDIRECT_PREFIX = "#REDIRECT "
     HTTP_PREFIX = "http://www."
     HTTPS_PREFIX = "https://www."
-    TPL_OPEN_TAG = "[tpl]"
-    TPL_CLOSED_TAG = "[/tpl]"
-    REF_OPEN_TAGS = ["[ref]"]
-    CHAT_GPT_API_KEY = "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"
+    TPL_TAG = "tpl"
+    REF_TAG = "ref"
+    IMAGE_TAG = "[[Image:"
+    FILE_TAG = "[[File:"
+    CHAT_GPT_API_KEY = "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"

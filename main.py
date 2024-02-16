@@ -22,7 +22,9 @@ def process_file(filename):
         body = ""
 
         for line in file:
-            if line.startswith("[[") and line.endswith("]]\n"):
+            if line.startswith("[[") and not line.startswith(Constants.IMAGE_TAG) \
+                    and not line.startswith(Constants.FILE_TAG) \
+                    and line.endswith("]]\n"):
                 if current_title:
                     content[current_title] = body
                     body = ""
@@ -63,7 +65,7 @@ def index_documents(documents, ix):
 
 def retrieve(index_name, query):
     with index_name.searcher() as searcher:
-        results = searcher.search(query, limit=10, reverse=False)
+        results = searcher.search(query, limit=None, reverse=False)
         if results:
             return [res['title'] for res in results]
         else:
@@ -80,6 +82,8 @@ def add_documents_to_index(ix):
 
 
 def create_index():
+    stop_words.add(Constants.TPL_TAG)
+    stop_words.add(Constants.REF_TAG)
     my_analyzer = StemmingAnalyzer(expression=r"[\w-]+(\.?\w+)*", stoplist=stop_words)
     schema = Schema(title=TEXT(stored=True, analyzer=my_analyzer, field_boost=2.0), content=TEXT(analyzer=my_analyzer))
 
@@ -141,7 +145,8 @@ def test_index():
             rank = get_rank(response, value[1])
             if rank != 0:
                 rank_sum += 1 / rank
-                tp_chat_gpt += get_precision_using_chat_gpt(response, key, value[1], client)
+                if rank <= 10:
+                    tp_chat_gpt += get_precision_using_chat_gpt(response[0:10], key, value[1], client)
 
     precision = tp / total
     precision_chat_gpt = tp_chat_gpt / total
