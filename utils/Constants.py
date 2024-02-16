@@ -1,6 +1,7 @@
 class Constants:
     INDEX_DIRECTORY = "my_index_directory"
-    WIKI_DIRECTORY = "./FileExample/"
+    QUESTIONS_FILE = "data/questions.txt"
+    WIKI_DIRECTORY = "data/FileExample/"
     REDIRECT_PREFIX = "#REDIRECT "
     HTTP_PREFIX = "http://www."
     HTTPS_PREFIX = "https://www."
@@ -8,4 +9,4 @@ class Constants:
     REF_TAG = "ref"
     IMAGE_TAG = "[[Image:"
     FILE_TAG = "[[File:"
-    CHAT_GPT_API_KEY = "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"
+    CHAT_GPT_API_KEY = ""
